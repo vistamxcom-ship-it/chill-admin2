@@ -508,7 +508,7 @@ let CFG = {
   botContactoNum: '',    // número editable que verá el cliente para avisar que ya va a pagar (eSIM)
   refOXXO: '4189143182308570',      // referencia depósito OXXO
   refSPEI: '167150000067782251',    // CLABE / referencia SPEI
-  serverUrl: 'http://localhost:3000',
+  serverUrl: 'https://cashazo-admin.fly.dev',
   botPlatform: 'wa',
   botActivo: false,      // bot automático ON/OFF
   botDiasVencido: 1,     // días vencido para activar bot
@@ -2892,7 +2892,7 @@ let srvConnected = false;
 
 async function checkServer(){
   try{
-    const r=await fetch((CFG.serverUrl||'http://localhost:3000')+'/api/health',{signal:AbortSignal.timeout(2000)});
+    const r=await fetch((CFG.serverUrl||'https://cashazo-admin.fly.dev')+'/api/health',{signal:AbortSignal.timeout(2000)});
     const d=await r.json();
     srvConnected = d.status === 'ok';
     const dot=document.getElementById('srvDot');
@@ -2917,7 +2917,7 @@ async function checkServer(){
 async function syncToServer(){
   if(!srvConnected) return;
   try{
-    await fetch((CFG.serverUrl||'http://localhost:3000')+'/sync',{
+    await fetch((CFG.serverUrl||'https://cashazo-admin.fly.dev')+'/sync',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({accs,cfg:CFG,vendedores,redes})
     });
@@ -2933,7 +2933,7 @@ async function cargarClientesDelServidor(){
   if(!srvConnected) return;
   try{
     console.log('📥 Cargando datos del servidor...');
-    const resp = await fetch((CFG.serverUrl||'http://localhost:3000')+'/sync');
+    const resp = await fetch((CFG.serverUrl||'https://cashazo-admin.fly.dev')+'/sync');
     const data = await resp.json();
     
     if(data.accs && Array.isArray(data.accs) && data.accs.length > 0){
@@ -2965,7 +2965,7 @@ async function cargarClientesDelServidor(){
 async function loadPendientes(){
   if(!srvConnected) return;
   try{
-    const r=await fetch((CFG.serverUrl||'http://localhost:3000')+'/pendientes');
+    const r=await fetch((CFG.serverUrl||'https://cashazo-admin.fly.dev')+'/pendientes');
     const lista=await r.json();
     if(lista.length) renderPendientes(lista);
   }catch{}
@@ -2988,7 +2988,7 @@ function renderPendientes(lista){
 
 async function confirmarPendiente(idx, accId, tipo, monto){
   if(srvConnected){
-    const r=await fetch((CFG.serverUrl||'http://localhost:3000')+'/confirmar-pago',{
+    const r=await fetch((CFG.serverUrl||'https://cashazo-admin.fly.dev')+'/confirmar-pago',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({accId:parseInt(accId),tipo,monto,pendienteIdx:idx,fecha:new Date().toLocaleDateString('es-MX')})
     });
@@ -3018,7 +3018,7 @@ async function confirmarPendiente(idx, accId, tipo, monto){
 
 async function descartarPendiente(idx){
   if(srvConnected){
-    await fetch((CFG.serverUrl||'http://localhost:3000')+'/descartar-pendiente',{
+    await fetch((CFG.serverUrl||'https://cashazo-admin.fly.dev')+'/descartar-pendiente',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({idx})
     });
@@ -3038,7 +3038,7 @@ async function enviarHoyBot(){
   })).filter(m=>m.numero.length>=10);
 
   try{
-    const r=await fetch((CFG.serverUrl||'http://localhost:3000')+'/enviar-hoy',{
+    const r=await fetch((CFG.serverUrl||'https://cashazo-admin.fly.dev')+'/enviar-hoy',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({mensajes})
     });
@@ -3086,7 +3086,7 @@ async function sendMsg(id, tipo){
   // Intentar vía servidor si está conectado
   if(srvConnected){
     try{
-      const r=await fetch((CFG.serverUrl||'http://localhost:3000')+'/enviar',{
+      const r=await fetch((CFG.serverUrl||'https://cashazo-admin.fly.dev')+'/enviar',{
         method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({numero:numFmt,texto:txt})
       });
@@ -3385,7 +3385,7 @@ function guardarCfg(){
   CFG.botUrl=document.getElementById('cfg-bot').value.trim();
   CFG.botLabel=document.getElementById('cfg-botlbl').value.trim()||'nuestro canal de atención';
   CFG.botPlatform=(document.getElementById('cfg-botplat')||{}).value||'wa';
-  CFG.serverUrl=document.getElementById('cfg-server')?document.getElementById('cfg-server').value.trim()||'http://localhost:3000':CFG.serverUrl;
+  CFG.serverUrl=document.getElementById('cfg-server')?document.getElementById('cfg-server').value.trim()||'https://cashazo-admin.fly.dev':CFG.serverUrl;
   CFG.nombreNegocio=document.getElementById('cfg-nom').value.trim()||CFG.nombreNegocio;
   CFG.tasaDefecto=parseFloat(document.getElementById('cfg-tasa').value)||50;
   CFG.solicitudUrl=document.getElementById('cfg-sol').value.trim();
@@ -3393,7 +3393,7 @@ function guardarCfg(){
   CFG.botIntervaloMin=parseInt((document.getElementById('cfg-bot-intv')||{}).value||60)||60;
   CFG.botLlamarDias=parseInt((document.getElementById('cfg-bot-dias')||{}).value||3)||3;
   CFG.botLlamarRefs=(document.getElementById('cfg-bot-refs')||{}).checked!==false;
-  CFG.twilioServer=(document.getElementById('cfg-twilio-server')||{}).value?.trim()||'http://localhost:3000';
+  CFG.twilioServer=(document.getElementById('cfg-twilio-server')||{}).value?.trim()||'https://cashazo-admin.fly.dev';
   CFG.twilioSid=(document.getElementById('twilio_sid')||{}).value?.trim()||'';
   CFG.twilioToken=(document.getElementById('twilio_token')||{}).value?.trim()||'';
   CFG.twilioSms=(document.getElementById('twilio_number_sms')||{}).value?.trim()||'';
@@ -4250,7 +4250,7 @@ function eliminarClienteServidor(accId){
   
   // Si está conectado al servidor, sincronizar eliminación
   if(srvConnected) {
-    fetch((CFG.serverUrl||'http://localhost:3000')+'/eliminar-cliente',{
+    fetch((CFG.serverUrl||'https://cashazo-admin.fly.dev')+'/eliminar-cliente',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({accId, archivoCliente})
