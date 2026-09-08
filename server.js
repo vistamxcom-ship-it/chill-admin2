@@ -27,10 +27,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// ✅ Servir archivos estáticos (HTML, CSS, JS)
 app.use(express.static(__dirname, { 
   etag: true,
   maxAge: '1h',
-  index: 'admin-optimizado.html' // Usar la versión optimizada
+  index: 'index.html'
 }));
 
 // ============================================================================
@@ -158,7 +159,7 @@ app.get('/api/health', async (req, res) => {
 // GET / — Servir admin
 // ============================================================================
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'admin-optimizado.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // ============================================================================

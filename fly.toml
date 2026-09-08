@@ -7,6 +7,8 @@ dockerfile = "Dockerfile"
 
 [env]
 NODE_ENV = "production"
+SUPABASE_URL = "https://heljnwezenhdaxjcevti.supabase.co"
+SUPABASE_KEY = "sb_publishable_JEl1Zq6hs0sbGQ32Y1uzaA_7Px1gXkq"
 
 [http_service]
 internal_port = 3000
@@ -17,7 +19,3 @@ processes = ["app"]
 
 [[stickiness]]
 header = "Cookie"
-
-[env]
-SUPABASE_URL = "https://heljnwezenhdaxjcevti.supabase.co"
-SUPABASE_KEY = "sb_publishable_JEl1Zq6hs0sbGQ32Y1uzaA_7Px1gXkq"
