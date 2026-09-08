@@ -2,10 +2,10 @@
   "name": "cashazo-admin-sync",
   "version": "1.0.0",
   "description": "CASHAZO Admin - Sincronización en vivo con Supabase",
-  "main": "server.js",
+  "main": "server-admin-sync.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node server-admin-sync.js",
+    "dev": "node server-admin-sync.js"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -1,4 +1,3 @@
-# fly.toml file generated for cashazo-admin
 app = "cashazo-admin"
 primary_region = "sjc"
 
@@ -8,14 +7,27 @@ dockerfile = "Dockerfile"
 [env]
 NODE_ENV = "production"
 SUPABASE_URL = "https://heljnwezenhdaxjcevti.supabase.co"
-SUPABASE_KEY = "sb_publishable_JEl1Zq6hs0sbGQ32Y1uzaA_7Px1gXkq"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlbGpud2V6ZW5oZGF4amNldnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNTcyNzMsImV4cCI6MjEwMzgzMzI3M30.4Ri1SUroyhJVB4hueroF8-aM8YsRadeCsLkGcOxKwDM"
 
-[http_service]
+[[services]]
 internal_port = 3000
-force_https = true
-auto_stop_machines = true
-auto_start_machines = true
 processes = ["app"]
+protocol = "tcp"
 
-[[stickiness]]
-header = "Cookie"
+[services.concurrency]
+hard_limit = 25
+soft_limit = 20
+
+[[services.ports]]
+handlers = ["http"]
+port = 80
+
+[[services.ports]]
+handlers = ["tls", "http"]
+port = 443
+
+[[services.tcp_checks]]
+interval = "15s"
+timeout = "5s"
+grace_period = "5s"
+max_retries = 3

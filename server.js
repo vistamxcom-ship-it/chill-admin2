@@ -27,11 +27,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// ✅ Servir archivos estáticos (HTML, CSS, JS)
 app.use(express.static(__dirname, { 
   etag: true,
   maxAge: '1h',
-  index: 'index.html'
+  index: 'admin-optimizado.html' // Usar la versión optimizada
 }));
 
 // ============================================================================
