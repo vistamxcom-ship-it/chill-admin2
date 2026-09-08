@@ -3374,102 +3374,74 @@ function importarBackup(){
 }
 
 function guardarCfg(){
+  CFG.adminUser=document.getElementById('cfg-user').value.trim()||CFG.adminUser;
+  CFG.adminPass=document.getElementById('cfg-pass').value||CFG.adminPass;
+  CFG.waAdmin=document.getElementById('cfg-wa').value.trim();
+  CFG.smsAdmin=document.getElementById('cfg-sms').value.trim();
+  CFG.waNegocio=(document.getElementById('cfg-wa-neg')||{}).value?.trim()||CFG.waNegocio||'';
+  CFG.botContactoNum=(document.getElementById('cfg-contacto-num')||{}).value?.trim()||CFG.botContactoNum||'';
+  CFG.refOXXO=(document.getElementById('cfg-ref-oxxo')||{}).value?.trim()||'';
+  CFG.refSPEI=(document.getElementById('cfg-ref-spei')||{}).value?.trim()||'';
+  CFG.botUrl=document.getElementById('cfg-bot').value.trim();
+  CFG.botLabel=document.getElementById('cfg-botlbl').value.trim()||'nuestro canal de atención';
+  CFG.botPlatform=(document.getElementById('cfg-botplat')||{}).value||'wa';
+  CFG.serverUrl=document.getElementById('cfg-server')?document.getElementById('cfg-server').value.trim()||'https://cashazo-admin.fly.dev':CFG.serverUrl;
+  CFG.nombreNegocio=document.getElementById('cfg-nom').value.trim()||CFG.nombreNegocio;
+  CFG.tasaDefecto=parseFloat(document.getElementById('cfg-tasa').value)||50;
+  CFG.solicitudUrl=document.getElementById('cfg-sol').value.trim();
+  CFG.botActivo=(document.getElementById('cfg-bot-activo')||{}).checked||CFG.botActivo;
+  CFG.botIntervaloMin=parseInt((document.getElementById('cfg-bot-intv')||{}).value||60)||60;
+  CFG.botLlamarDias=parseInt((document.getElementById('cfg-bot-dias')||{}).value||3)||3;
+  CFG.botLlamarRefs=(document.getElementById('cfg-bot-refs')||{}).checked!==false;
+  CFG.twilioServer=(document.getElementById('cfg-twilio-server')||{}).value?.trim()||'https://cashazo-admin.fly.dev';
+  CFG.twilioSid=(document.getElementById('twilio_sid')||{}).value?.trim()||'';
+  CFG.twilioToken=(document.getElementById('twilio_token')||{}).value?.trim()||'';
+  CFG.twilioSms=(document.getElementById('twilio_number_sms')||{}).value?.trim()||'';
+  CFG.twilioWa=(document.getElementById('twilio_number_wa')||{}).value?.trim()||'';
+  
+  // ✅ GUARDAR LOCALMENTE PRIMERO (INSTANTÁNEO)
   try {
-    // ✅ Función auxiliar segura para obtener valores de inputs
-    const getVal = (id, defVal='') => {
-      const el = document.getElementById(id);
-      return el ? el.value?.trim() || defVal : defVal;
-    };
-    const getChecked = (id, defVal=false) => {
-      const el = document.getElementById(id);
-      return el ? el.checked : defVal;
-    };
-    
-    // ✅ Capturar valores con validación segura
-    CFG.adminUser = getVal('cfg-user', CFG.adminUser);
-    CFG.adminPass = getVal('cfg-pass', CFG.adminPass);
-    CFG.waAdmin = getVal('cfg-wa', '');
-    CFG.smsAdmin = getVal('cfg-sms', '');
-    CFG.waNegocio = getVal('cfg-wa-neg', CFG.waNegocio||'');
-    CFG.botContactoNum = getVal('cfg-contacto-num', CFG.botContactoNum||'');
-    CFG.refOXXO = getVal('cfg-ref-oxxo', '');
-    CFG.refSPEI = getVal('cfg-ref-spei', '');
-    CFG.botUrl = getVal('cfg-bot', '');
-    CFG.botLabel = getVal('cfg-botlbl', 'nuestro canal de atención');
-    CFG.botPlatform = getVal('cfg-botplat', 'wa');
-    CFG.serverUrl = getVal('cfg-server', 'https://cashazo-admin.fly.dev');
-    CFG.nombreNegocio = getVal('cfg-nom', CFG.nombreNegocio);
-    CFG.tasaDefecto = parseFloat(getVal('cfg-tasa', '50')) || 50;
-    CFG.solicitudUrl = getVal('cfg-sol', '');
-    CFG.botActivo = getChecked('cfg-bot-activo', CFG.botActivo);
-    CFG.botIntervaloMin = parseInt(getVal('cfg-bot-intv', '60')) || 60;
-    CFG.botLlamarDias = parseInt(getVal('cfg-bot-dias', '3')) || 3;
-    CFG.botLlamarRefs = getChecked('cfg-bot-refs', true);
-    CFG.twilioServer = getVal('cfg-twilio-server', 'https://cashazo-admin.fly.dev');
-    CFG.twilioSid = getVal('twilio_sid', '');
-    CFG.twilioToken = getVal('twilio_token', '');
-    CFG.twilioSms = getVal('twilio_number_sms', '');
-    CFG.twilioWa = getVal('twilio_number_wa', '');
-    
-    console.log('✅ Valores capturados:', CFG);
-    
-    // ✅ GUARDAR LOCALMENTE PRIMERO (INSTANTÁNEO)
-    try {
-      localStorage.setItem('cashazo_optimizado_cfg', JSON.stringify(CFG));
-      console.log('✅ Config guardada en localStorage');
-    } catch(e) {
-      console.error('⚠️ Error guardando en localStorage:', e);
-    }
-    
-    if(typeof persist !== 'undefined') {
-      persist.saveConfig();
-      console.log('✅ Config guardada en persist');
-    }
-    
-    // Mostrar mensaje INMEDIATAMENTE (no esperar al servidor)
-    const msgEl = document.getElementById('cfg-msg');
-    if(msgEl) {
-      msgEl.textContent='✓ Configuración guardada';
-      msgEl.style.color='var(--grn)';
-      setTimeout(()=>msgEl.textContent='',3000);
-    }
-    
-    // 🔄 EN BACKGROUND: sincronizar a Supabase (SIN BLOQUEAR)
-    setTimeout(() => {
-      fetch('/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          accs: accs,
-          vendedores: vendedores,
-          cfg: CFG,
-          redes: (typeof REDES !== 'undefined' ? REDES : [])
-        })
-      })
-      .then(res => {
-        if (res.ok) {
-          console.log('✅ Config sincronizada con servidor');
-        } else {
-          console.error('❌ Error al sincronizar config, status:', res.status);
-          if(msgEl) {
-            msgEl.textContent='⚠️ Guardado local, pero falló sync con servidor';
-            msgEl.style.color='var(--red, #e05252)';
-          }
-        }
-      })
-      .catch(err => {
-        console.warn('⚠️ Sync background error:', err.message);
-        if(msgEl) {
-          msgEl.textContent='✓ Guardado localmente (sin conexión al servidor)';
-          msgEl.style.color='var(--amb, #d4932a)';
-        }
-      });
-    }, 100);
-    
-  } catch(err) {
-    console.error('❌ Error crítico en guardarCfg:', err);
-    alert('❌ Error al guardar configuración: ' + err.message);
+    localStorage.setItem('cashazo_optimizado_cfg', JSON.stringify(CFG));
+  } catch(e) {}
+  
+  if(typeof persist !== 'undefined') {
+    persist.saveConfig();
   }
+  
+  // Mostrar mensaje INMEDIATAMENTE (no esperar al servidor)
+  document.getElementById('cfg-msg').textContent='✓ Configuración guardada';
+  document.getElementById('cfg-msg').style.color='var(--grn)';
+  setTimeout(()=>document.getElementById('cfg-msg').textContent='',3000);
+  
+  // 🔄 EN BACKGROUND: sincronizar a Supabase (SIN BLOQUEAR)
+  // ✅ FIX: usar ruta relativa '/sync' (igual que saveData) en vez de CFG.serverUrl,
+  // que por defecto apunta a http://localhost:3000 y falla en producción.
+  setTimeout(() => {
+    fetch('/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        accs: accs,
+        vendedores: vendedores,
+        cfg: CFG,
+        redes: (typeof REDES !== 'undefined' ? REDES : [])
+      })
+    })
+    .then(res => {
+      if (res.ok) {
+        console.log('✅ Config sincronizada con Supabase en background');
+      } else {
+        console.error('❌ Error al sincronizar config, status:', res.status);
+        document.getElementById('cfg-msg').textContent='⚠️ Guardado local, pero falló sync con servidor';
+        document.getElementById('cfg-msg').style.color='var(--red, #e05252)';
+      }
+    })
+    .catch(err => {
+      console.warn('⚠️ Sync background error (config está guardada localmente):', err.message);
+      document.getElementById('cfg-msg').textContent='⚠️ Guardado local, sin conexión al servidor';
+      document.getElementById('cfg-msg').style.color='var(--red, #e05252)';
+    });
+  }, 100); // Post en background, no bloquea
 }
 
 // ============================================================
